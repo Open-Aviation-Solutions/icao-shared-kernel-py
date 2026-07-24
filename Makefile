@@ -13,7 +13,8 @@ help: ## List available targets
 
 $(VENV)/bin/python:
 	python3 -m venv $(VENV)
-	$(PIP) install --upgrade pip maturin pytest pytest-asyncio
+	$(PIP) install --upgrade pip maturin pytest pytest-asyncio httpx \
+		sqlalchemy 'starlette-admin>=0.16.0' 'fastapi>=0.135.1' 'uvicorn>=0.41.0'
 
 venv: $(VENV)/bin/python ## Create the local dev virtualenv (maturin + pytest)
 
