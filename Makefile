@@ -13,7 +13,7 @@ help: ## List available targets
 
 $(VENV)/bin/python:
 	python3 -m venv $(VENV)
-	$(PIP) install --upgrade pip maturin pytest
+	$(PIP) install --upgrade pip maturin pytest pytest-asyncio
 
 venv: $(VENV)/bin/python ## Create the local dev virtualenv (maturin + pytest)
 
