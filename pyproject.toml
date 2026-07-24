@@ -9,6 +9,14 @@ description = "Python bindings for the icao-shared-kernel Rust domain crate."
 requires-python = ">=3.9"
 classifiers = ["Programming Language :: Rust", "Programming Language :: Python :: Implementation :: CPython"]
 
+[project.optional-dependencies]
+admin = [
+    "sqlalchemy>=2.0",
+    "starlette-admin>=0.16.0",
+    "fastapi>=0.135.1",
+    "uvicorn>=0.41.0",
+]
+
 [tool.maturin]
 python-source = "python"
 module-name = "icao_shared_kernel._icao_shared_kernel"
@@ -18,4 +26,4 @@ features = ["pyo3/extension-module"]
 asyncio_mode = "auto"
 
 [dependency-groups]
-dev = ["pytest>=8", "pytest-asyncio>=0.24"]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "httpx>=0.27"]
