@@ -10,7 +10,7 @@ from starlette_admin.fields import CollectionField, ListField, StringField
 
 from ... import Licence, Pilot, ValidationError
 from ...domain.repositories.pilot import PilotQuery, PilotRepository
-from ._base import PilotAdminBase
+from ._base import PilotAdminBase, route_collection_error
 
 # display_name/legal_name have no dedicated value-object constructor in the
 # Rust domain crate (unlike every other field on every aggregate) — they're
@@ -20,11 +20,17 @@ from ._base import PilotAdminBase
 # icao-shared-kernel-rs src/error.rs's FieldLength/Empty variants), so we
 # route the error to the matching form field on a best-effort basis.
 _PILOT_SCALAR_FIELDS = ("display_name", "legal_name")
+_LICENCE_FIELDS = ("issuing_state", "issuing_authority", "number")
 
 
-def _parse_licences(items: list[dict[str, Any]]) -> tuple[list[Licence], dict[str, str]]:
+def _parse_licences(
+    items: list[dict[str, Any]],
+) -> tuple[list[Licence], dict[int, dict[str, str]]]:
     licences: list[Licence] = []
-    errors: dict[str, str] = {}
+    # ListField's own error rendering does error.get(loop.index0) expecting
+    # int keys, then hands that value to the CollectionField below it, which
+    # does error.get(field.name) in turn — hence the two-level nesting.
+    errors: dict[int, dict[str, str]] = {}
     for i, item in enumerate(items):
         try:
             licences.append(
@@ -35,7 +41,7 @@ def _parse_licences(items: list[dict[str, Any]]) -> tuple[list[Licence], dict[st
                 )
             )
         except ValidationError as exc:
-            errors[f"licences[{i}]"] = str(exc)
+            errors[i] = route_collection_error(exc, _LICENCE_FIELDS)
     return licences, errors
 
 
@@ -107,9 +113,9 @@ class PilotAdminView(PilotAdminBase):
         return results
 
     async def create(self, request: Request, data: dict[str, Any]) -> Any:
-        licences, errors = _parse_licences(data.get("licences") or [])
-        if errors:
-            raise FormValidationError(errors)
+        licences, licence_errors = _parse_licences(data.get("licences") or [])
+        if licence_errors:
+            raise FormValidationError({"licences": licence_errors})
         try:
             pilot = Pilot(
                 data["display_name"],
@@ -121,9 +127,9 @@ class PilotAdminView(PilotAdminBase):
         return await self._repo.save_pilot(pilot)
 
     async def edit(self, request: Request, pk: Any, data: dict[str, Any]) -> Any:
-        licences, errors = _parse_licences(data.get("licences") or [])
-        if errors:
-            raise FormValidationError(errors)
+        licences, licence_errors = _parse_licences(data.get("licences") or [])
+        if licence_errors:
+            raise FormValidationError({"licences": licence_errors})
         try:
             pilot = Pilot(
                 data["display_name"],

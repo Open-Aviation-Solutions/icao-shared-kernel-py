@@ -39,8 +39,20 @@ def build_or_collect(
 
     Returns ``(values, errors)`` — ``values`` holds the successfully built
     value objects keyed by field name; ``errors`` holds
-    ``{field: message}`` for the rest, in the shape
-    ``starlette_admin.exceptions.FormValidationError`` expects directly.
+    ``{field: message}`` for the rest.
+
+    For **flat** fields only (a plain ``StringField``/``DateTimeField`` etc.
+    directly on the aggregate, like ``Flight.departure``) — the resulting
+    ``errors`` dict can be passed straight to ``FormValidationError``. A
+    field backed by a ``CollectionField`` (e.g. ``Aircraft.registration``)
+    or a ``ListField`` (e.g. ``Pilot.licences``) needs its error nested one
+    level deeper instead — see ``route_collection_error`` below; starlette-
+    admin's own templates do ``error.get(field.name)`` /
+    ``error.get(loop.index0)`` on whatever value is passed for that field,
+    so a flat string there raises ``AttributeError`` when the template
+    tries to drill into it (discovered via the admin test suite in task
+    0002 — the original Pydantic version had the same bug, undetected,
+    since it had no admin tests at all).
     """
     values: dict[str, Any] = {}
     errors: dict[str, str] = {}
@@ -50,6 +62,27 @@ def build_or_collect(
         except ValidationError as exc:
             errors[name] = str(exc)
     return values, errors
+
+
+def route_collection_error(
+    exc: ValidationError, sub_fields: tuple[str, ...]
+) -> dict[str, str]:
+    """Map a ValidationError from a multi-argument value-object constructor
+    to the ``{sub_field: message}`` shape a CollectionField's own error
+    rendering requires (``forms/collection.html`` does
+    ``error.get(field.name)`` on whatever's passed for the group).
+
+    Rust reports one error per constructor *call*, not per argument, so
+    there's no way to know for certain which argument was at fault beyond
+    the field name every domain error message leads with (see
+    icao-shared-kernel-rs's error.rs — every ``FieldLength``/``Empty``
+    variant's Display starts with ``{field}``). Ambiguous or unrecognised
+    messages fall back to the first sub-field.
+    """
+    message = str(exc)
+    leading_word = message.split(maxsplit=1)[0] if message else ""
+    field = leading_word if leading_word in sub_fields else sub_fields[0]
+    return {field: message}
 
 
 class _WithRelations:

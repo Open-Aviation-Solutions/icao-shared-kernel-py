@@ -7,9 +7,9 @@ from starlette.requests import Request
 from starlette_admin.exceptions import FormValidationError
 from starlette_admin.fields import CollectionField, StringField
 
-from ... import Aircraft, AircraftRegistration, AircraftType
+from ... import Aircraft, AircraftRegistration, AircraftType, ValidationError
 from ...domain.repositories.aircraft import AircraftQuery, AircraftRepository
-from ._base import PilotAdminBase, build_or_collect
+from ._base import PilotAdminBase, route_collection_error
 
 
 class AircraftAdminView(PilotAdminBase):
@@ -79,20 +79,27 @@ class AircraftAdminView(PilotAdminBase):
         return results
 
     @staticmethod
-    def _parse_fields(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, str]]:
-        aircraft_type = data.get("aircraft_type") or {}
-        registration = data.get("registration") or {}
-        return build_or_collect(
-            {
-                "aircraft_type": lambda: AircraftType(
-                    aircraft_type.get("designator", "")
-                ),
-                "registration": lambda: AircraftRegistration(
-                    registration.get("nationality", ""),
-                    registration.get("registration", ""),
-                ),
-            }
-        )
+    def _parse_fields(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+        aircraft_type_data = data.get("aircraft_type") or {}
+        registration_data = data.get("registration") or {}
+        values: dict[str, Any] = {}
+        errors: dict[str, Any] = {}
+        try:
+            values["aircraft_type"] = AircraftType(
+                aircraft_type_data.get("designator", "")
+            )
+        except ValidationError as exc:
+            errors["aircraft_type"] = route_collection_error(exc, ("designator",))
+        try:
+            values["registration"] = AircraftRegistration(
+                registration_data.get("nationality", ""),
+                registration_data.get("registration", ""),
+            )
+        except ValidationError as exc:
+            errors["registration"] = route_collection_error(
+                exc, ("nationality", "registration")
+            )
+        return values, errors
 
     async def create(self, request: Request, data: dict[str, Any]) -> Any:
         values, errors = self._parse_fields(data)
