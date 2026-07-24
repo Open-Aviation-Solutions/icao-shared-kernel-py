@@ -4,3 +4,5 @@ __pycache__/
 *.pyc
 .pytest_cache/
 *.egg-info/
+python/icao_shared_kernel/*.so
+python/icao_shared_kernel/*.pyd

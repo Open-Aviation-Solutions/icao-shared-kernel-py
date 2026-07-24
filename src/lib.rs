@@ -24,7 +24,7 @@ use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 
 #[pymodule]
-fn icao_shared_kernel(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _icao_shared_kernel(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<waypoint::Waypoint>()?;
     m.add_class::<coordinate::Coordinate>()?;
     m.add_class::<significant_point::SignificantPoint>()?;

@@ -6,7 +6,7 @@ description = "Python bindings (PyO3) for the icao-shared-kernel Rust domain cra
 publish = false
 
 [lib]
-name = "icao_shared_kernel"
+name = "_icao_shared_kernel"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
