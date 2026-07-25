@@ -198,7 +198,7 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 [[package]]
 name = "icao-shared-kernel"
 version = "0.1.0"
-source = "git+https://github.com/Open-Aviation-Solutions/icao-shared-kernel-rs?branch=aircraft-flight-with-id#f4804e968f7dbb546299c1b1c22033e8b90ec66c"
+source = "git+https://github.com/Open-Aviation-Solutions/icao-shared-kernel-rs?branch=main#3604bfdf5192b19e7d67ee6aa30d7048287c983f"
 dependencies = [
  "rust_decimal",
  "serde",
