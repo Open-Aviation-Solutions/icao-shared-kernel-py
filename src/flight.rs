@@ -4,6 +4,7 @@
 use icao_shared_kernel::Flight as DomainFlight;
 use pyo3::prelude::*;
 use time::UtcDateTime;
+use uuid::Uuid;
 
 use crate::convert::parse_uuid;
 use crate::error::to_py_err;
@@ -20,16 +21,23 @@ pub struct Flight(pub(crate) DomainFlight);
 #[pymethods]
 impl Flight {
     #[new]
-    #[pyo3(signature = (aircraft_id, departure, arrival, first_movement=None, last_movement=None))]
+    #[pyo3(signature = (aircraft_id, departure, arrival, first_movement=None, last_movement=None, id=None))]
+    #[allow(clippy::too_many_arguments)]
     fn new(
         aircraft_id: &str,
         departure: PyRef<'_, SignificantPoint>,
         arrival: PyRef<'_, SignificantPoint>,
         first_movement: Option<UtcDateTime>,
         last_movement: Option<UtcDateTime>,
+        id: Option<&str>,
     ) -> PyResult<Self> {
         let aircraft_id = parse_uuid(aircraft_id)?;
-        Ok(Self(DomainFlight::new(
+        let id = match id {
+            Some(id) => parse_uuid(id)?,
+            None => Uuid::new_v4(),
+        };
+        Ok(Self(DomainFlight::with(
+            id,
             aircraft_id,
             departure.to_domain(),
             arrival.to_domain(),

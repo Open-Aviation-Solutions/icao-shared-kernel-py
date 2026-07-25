@@ -82,7 +82,10 @@ class Licence:
 
 class Aircraft:
     def __init__(
-        self, aircraft_type: AircraftType, registration: AircraftRegistration
+        self,
+        aircraft_type: AircraftType,
+        registration: AircraftRegistration,
+        id: str | None = None,
     ) -> None: ...
     @staticmethod
     def create(
@@ -120,6 +123,7 @@ class Flight:
         arrival: SignificantPoint,
         first_movement: datetime | None = None,
         last_movement: datetime | None = None,
+        id: str | None = None,
     ) -> None: ...
     @staticmethod
     def create(aircraft_id: str, departure: str, arrival: str) -> Flight:
