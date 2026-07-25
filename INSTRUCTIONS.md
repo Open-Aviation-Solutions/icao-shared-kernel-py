@@ -3,8 +3,9 @@
 Python bindings (PyO3) for the [`icao-shared-kernel-rs`](https://github.com/Open-Aviation-Solutions/icao-shared-kernel-rs)
 domain crate. Sibling repo to `icao-shared-kernel-rs`; the design decisions
 behind this crate are recorded in `tasks/0001-python-support-plan.md`.
-Repository protocols/infra deliberately do **not** live here — see
-`tasks/0002-repositories-belong-in-consuming-apps.md`.
+Repository protocols and infrastructure adapters (filesystem, admin, etc.)
+deliberately do not live here — that's each consuming application's own
+decision (e.g. `pilot-logbook` owns its own), not this crate's.
 
 ## Purpose and scope
 
