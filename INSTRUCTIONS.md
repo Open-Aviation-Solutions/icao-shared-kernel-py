@@ -2,8 +2,9 @@
 
 Python bindings (PyO3) for the [`icao-shared-kernel-rs`](https://github.com/Open-Aviation-Solutions/icao-shared-kernel-rs)
 domain crate. Sibling repo to `icao-shared-kernel-rs`; the design decisions
-behind this crate are recorded in `aviation-core` task
-`0015-python-support-plan.md`.
+behind this crate are recorded in `tasks/0001-python-support-plan.md`.
+Repository protocols/infra deliberately do **not** live here — see
+`tasks/0002-repositories-belong-in-consuming-apps.md`.
 
 ## Purpose and scope
 
@@ -25,7 +26,7 @@ API; that migration is scoped separately, once this crate is usable.
   `icao-shared-kernel-rs`, not here. If a rule needs adding or changing,
   change it there first, then update the binding (usually no change needed,
   since bindings delegate).
-- **Boundary type mapping is fixed** (see task 0015 for the reasoning):
+- **Boundary type mapping is fixed** (see task 0001 for the reasoning):
   - `Uuid` ↔ Python `str`.
   - `rust_decimal::Decimal` ↔ Python `str`.
   - `time::UtcDateTime` ↔ aware Python `datetime.datetime` (UTC), via
@@ -50,7 +51,7 @@ API; that migration is scoped separately, once this crate is usable.
   `Waypoint`/`Coordinate` opt in explicitly (`from_py_object`) because they
   are `SignificantPoint`'s complex-enum variant fields, which need it to
   extract constructor arguments.
-- **Type stubs are hand-written** (`*.pyi`), not generated — see task 0015
+- **Type stubs are hand-written** (`*.pyi`), not generated — see task 0001
   for why. Keep them in sync with `src/lib.rs`'s public surface by hand.
 
 ## Commands

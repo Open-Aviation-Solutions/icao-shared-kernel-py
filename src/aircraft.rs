@@ -2,9 +2,11 @@
 
 use icao_shared_kernel::Aircraft as DomainAircraft;
 use pyo3::prelude::*;
+use uuid::Uuid;
 
 use crate::aircraft_registration::AircraftRegistration;
 use crate::aircraft_type::AircraftType;
+use crate::convert::parse_uuid;
 use crate::error::to_py_err;
 
 /// Aircraft reference entity: ICAO-universal identity and descriptors.
@@ -15,11 +17,21 @@ pub struct Aircraft(pub(crate) DomainAircraft);
 #[pymethods]
 impl Aircraft {
     #[new]
-    fn new(aircraft_type: &AircraftType, registration: &AircraftRegistration) -> Self {
-        Self(DomainAircraft::new(
+    #[pyo3(signature = (aircraft_type, registration, id=None))]
+    fn new(
+        aircraft_type: &AircraftType,
+        registration: &AircraftRegistration,
+        id: Option<&str>,
+    ) -> PyResult<Self> {
+        let id = match id {
+            Some(id) => parse_uuid(id)?,
+            None => Uuid::new_v4(),
+        };
+        Ok(Self(DomainAircraft::with(
+            id,
             aircraft_type.0.clone(),
             registration.0.clone(),
-        ))
+        )))
     }
 
     /// Convenience constructor from raw strings, validating each part.
