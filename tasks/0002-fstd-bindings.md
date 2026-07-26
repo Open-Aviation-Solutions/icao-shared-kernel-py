@@ -51,19 +51,27 @@ Five new classes, plus one new exception:
 Once `icao-shared-kernel-rs` PR #3 merges, **repoint it to `branch = "main"`**
 and re-run `make check`. The pin is the only reason this can't merge as-is.
 
-### Verifying locally
+### Verifying in a sandboxed agent environment
 
-Cargo cannot fetch the git dependency from a sandboxed environment (SSH auth
-is unavailable to its subprocess). To build and test against a local
-`icao-shared-kernel-rs` checkout, temporarily swap the dependency for a path
-one:
+The branch is reachable — CI and ordinary developer machines fetch it fine.
+The obstacle is local: this developer's global gitconfig rewrites
+`https://github.com/` to `git@github.com:` (`url.insteadOf`), so cargo's fetch
+becomes an SSH one, and an agent sandbox without the SSH key cannot
+authenticate.
 
-```toml
-icao-shared-kernel = { path = "../icao-shared-kernel-rs" }
+Bypass the global rewrite and supply a token, rather than switching to a path
+dependency — a path override quietly changes what is being verified:
+
+```sh
+GIT_CONFIG_GLOBAL=/dev/null \
+GIT_CONFIG_COUNT=1 \
+GIT_CONFIG_KEY_0="url.https://x-access-token:$(gh auth token)@github.com/.insteadOf" \
+GIT_CONFIG_VALUE_0="https://github.com/" \
+CARGO_NET_GIT_FETCH_WITH_CLI=true make check
 ```
 
-Restore the git line before committing. A `[patch]` section does *not* work
-here — cargo still tries to update the git source to resolve the branch.
+A `[patch]` section does *not* help: cargo still updates the git source to
+resolve the branch.
 
 ## Acceptance criteria
 
@@ -75,7 +83,8 @@ here — cargo still tries to update the git source to resolve the branch.
 - [x] `tests/test_fstd.py` — unqualified device, empty designation, validity
       inclusivity at both ends, invalid period, malformed issuing state,
       one device across two simulated types, session route and duration.
-- [x] `make check` passes (clippy `-D warnings`, fmt, 78 pytest tests).
+- [x] `make check` passes against the real git dependency (clippy
+      `-D warnings`, fmt, 78 pytest tests); `Cargo.lock` updated to match.
 - [ ] Dependency repointed to `main` after PR #3 merges.
 
 ## Related
