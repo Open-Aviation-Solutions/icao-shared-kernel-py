@@ -4,7 +4,7 @@ Hand-written, not generated — see task 0015-python-support-plan.md for why.
 Keep in sync with src/lib.rs and the per-type src/*.rs modules by hand.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 
 class ValidationError(ValueError):
     """Base class for every icao_shared_kernel validation error."""
@@ -15,6 +15,7 @@ class InvalidAircraftTypeError(ValidationError): ...
 class FieldLengthError(ValidationError): ...
 class EmptyFieldError(ValidationError): ...
 class IssuingStateError(ValidationError): ...
+class ValidityPeriodError(ValidationError): ...
 class LatitudeError(ValidationError): ...
 class LongitudeError(ValidationError): ...
 
@@ -143,4 +144,100 @@ class Flight:
     @property
     def last_movement(self) -> datetime | None: ...
     def route_summary(self) -> str: ...
+    def duration(self) -> FlightDuration | None: ...
+
+class DeviceDesignation:
+    """Free-text identification of a physical training device."""
+
+    def __init__(self, designation: str) -> None: ...
+    @property
+    def designation(self) -> str: ...
+
+class DeviceQualification:
+    """A device qualification granted by a national aviation authority, valid
+    over a bounded period."""
+
+    def __init__(
+        self,
+        issuing_state: str,
+        issuing_authority: str,
+        level: str,
+        valid_from: date,
+        valid_until: date,
+    ) -> None: ...
+    @property
+    def issuing_state(self) -> str: ...
+    @property
+    def issuing_authority(self) -> str: ...
+    @property
+    def level(self) -> str: ...
+    @property
+    def valid_from(self) -> date: ...
+    @property
+    def valid_until(self) -> date: ...
+    def is_in_force_on(self, date: date) -> bool:
+        """Whether the qualification was in force on the given date, inclusive
+        of both end points."""
+
+class FstdKind:
+    """The three types of apparatus named by the ICAO Annex 1 definition."""
+
+    FlightSimulator: FstdKind
+    FlightProceduresTrainer: FstdKind
+    BasicInstrumentFlightTrainer: FstdKind
+
+class FlightSimulationTrainingDevice:
+    def __init__(
+        self,
+        kind: FstdKind,
+        designation: DeviceDesignation,
+        qualification: DeviceQualification | None = None,
+        id: str | None = None,
+    ) -> None: ...
+    @staticmethod
+    def create(
+        kind: FstdKind, designation: str
+    ) -> FlightSimulationTrainingDevice:
+        """Convenience constructor for an unqualified device."""
+
+    @property
+    def id(self) -> str: ...
+    @property
+    def kind(self) -> FstdKind: ...
+    @property
+    def designation(self) -> DeviceDesignation: ...
+    @property
+    def qualification(self) -> DeviceQualification | None: ...
+
+class FstdSession:
+    def __init__(
+        self,
+        device_id: str,
+        simulated_aircraft_type: AircraftType | None = None,
+        departure: SignificantPoint | None = None,
+        arrival: SignificantPoint | None = None,
+        start: datetime | None = None,
+        end: datetime | None = None,
+        id: str | None = None,
+    ) -> None: ...
+    @staticmethod
+    def create(device_id: str, simulated_type: str) -> FstdSession:
+        """Convenience constructor for a session with no route and no times
+        recorded."""
+
+    @property
+    def id(self) -> str: ...
+    @property
+    def device_id(self) -> str: ...
+    @property
+    def simulated_aircraft_type(self) -> AircraftType | None: ...
+    @property
+    def departure(self) -> SignificantPoint | None: ...
+    @property
+    def arrival(self) -> SignificantPoint | None: ...
+    @property
+    def start(self) -> datetime | None: ...
+    @property
+    def end(self) -> datetime | None: ...
+    def route_summary(self) -> str | None: ...
     def duration(self) -> FlightDuration | None: ...

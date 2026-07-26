@@ -52,6 +52,12 @@ create_exception!(
 );
 create_exception!(
     icao_shared_kernel,
+    ValidityPeriodError,
+    ValidationError,
+    "A validity period whose end date precedes its start date."
+);
+create_exception!(
+    icao_shared_kernel,
     LatitudeError,
     ValidationError,
     "A latitude outside the valid -90..=90 degree range."
@@ -75,6 +81,7 @@ pub(crate) fn to_py_err(err: DomainValidationError) -> PyErr {
         DomainValidationError::FieldLength { .. } => FieldLengthError::new_err(message),
         DomainValidationError::Empty { .. } => EmptyFieldError::new_err(message),
         DomainValidationError::IssuingState(_) => IssuingStateError::new_err(message),
+        DomainValidationError::ValidityPeriod { .. } => ValidityPeriodError::new_err(message),
         DomainValidationError::Latitude(_) => LatitudeError::new_err(message),
         DomainValidationError::Longitude(_) => LongitudeError::new_err(message),
     }
