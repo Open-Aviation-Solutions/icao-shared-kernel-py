@@ -10,7 +10,7 @@ name = "icao_shared_kernel"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-icao-shared-kernel = { git = "https://github.com/Open-Aviation-Solutions/icao-shared-kernel-rs", branch = "add-fstd-aggregates", version = "0.1.0" }
+icao-shared-kernel = { git = "https://github.com/Open-Aviation-Solutions/icao-shared-kernel-rs", branch = "main", version = "0.1.0" }
 pyo3 = { version = "0.29.0", features = ["extension-module", "time"] }
 rust_decimal = "1.42.1"
 time = { version = "0.3.54", features = ["formatting", "parsing"] }
