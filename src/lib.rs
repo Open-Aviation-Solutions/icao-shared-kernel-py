@@ -12,9 +12,13 @@ mod aircraft_registration;
 mod aircraft_type;
 mod convert;
 mod coordinate;
+mod device_designation;
+mod device_qualification;
 mod error;
 mod flight;
 mod flight_duration;
+mod fstd;
+mod fstd_session;
 mod licence;
 mod pilot;
 mod significant_point;
@@ -35,6 +39,11 @@ fn icao_shared_kernel(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<flight::Flight>()?;
     m.add_class::<aircraft::Aircraft>()?;
     m.add_class::<pilot::Pilot>()?;
+    m.add_class::<device_designation::DeviceDesignation>()?;
+    m.add_class::<device_qualification::DeviceQualification>()?;
+    m.add_class::<fstd::FstdKind>()?;
+    m.add_class::<fstd::FlightSimulationTrainingDevice>()?;
+    m.add_class::<fstd_session::FstdSession>()?;
 
     m.add_function(wrap_pyfunction!(waypoint::validate_waypoint_code, m)?)?;
 
@@ -56,6 +65,10 @@ fn icao_shared_kernel(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add(
         "IssuingStateError",
         py.get_type::<error::IssuingStateError>(),
+    )?;
+    m.add(
+        "ValidityPeriodError",
+        py.get_type::<error::ValidityPeriodError>(),
     )?;
     m.add("LatitudeError", py.get_type::<error::LatitudeError>())?;
     m.add("LongitudeError", py.get_type::<error::LongitudeError>())?;
