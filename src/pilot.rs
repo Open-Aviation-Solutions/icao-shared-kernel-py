@@ -10,8 +10,8 @@ use crate::licence::Licence;
 /// Pilot identity and the licences they hold. A pilot can hold licences from
 /// multiple States simultaneously (ICAO Annex 1 imposes no single-State
 /// restriction).
-#[pyclass(skip_from_py_object, module = "icao_shared_kernel")]
-#[derive(Clone)]
+#[pyclass(eq, skip_from_py_object, module = "icao_shared_kernel")]
+#[derive(Clone, PartialEq)]
 pub struct Pilot(pub(crate) DomainPilot);
 
 #[pymethods]

@@ -18,8 +18,8 @@ use crate::significant_point::SignificantPoint;
 /// particular route. `simulated_aircraft_type` is recorded per session
 /// because an unqualified device is routinely flown as a different type each
 /// time.
-#[pyclass(skip_from_py_object, module = "icao_shared_kernel")]
-#[derive(Clone)]
+#[pyclass(eq, skip_from_py_object, module = "icao_shared_kernel")]
+#[derive(Clone, PartialEq)]
 pub struct FstdSession(pub(crate) DomainFstdSession);
 
 #[pymethods]

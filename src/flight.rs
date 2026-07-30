@@ -13,8 +13,8 @@ use crate::significant_point::SignificantPoint;
 /// Which aircraft flew, from where to where, and when it first and last
 /// moved under its own power. `first_movement`/`last_movement` are aware
 /// `datetime.datetime` values in UTC.
-#[pyclass(skip_from_py_object, module = "icao_shared_kernel")]
-#[derive(Clone)]
+#[pyclass(eq, skip_from_py_object, module = "icao_shared_kernel")]
+#[derive(Clone, PartialEq)]
 pub struct Flight(pub(crate) DomainFlight);
 
 #[pymethods]

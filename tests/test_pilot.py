@@ -77,3 +77,23 @@ def test_licence_validation_rejects_bad_issuing_state(state: str) -> None:
 def test_pilot_validation_enforces_display_name_bounds(display_name: str) -> None:
     with pytest.raises(k.FieldLengthError):
         k.Pilot(display_name)
+
+
+def test_pilot_equality_is_by_value() -> None:
+    # Aggregates compare by value, so a reconstructed instance equals the
+    # original — a repository round trip can be asserted with a plain ==.
+    licences = [k.Licence("AU", "CASA", "12345")]
+    pilot = k.Pilot("Michael Nelson", licences=licences)
+    same = k.Pilot("Michael Nelson", licences=licences, id=pilot.id)
+
+    assert pilot == same
+
+
+def test_pilot_equality_covers_every_field() -> None:
+    licences = [k.Licence("AU", "CASA", "12345")]
+    pilot = k.Pilot("Michael Nelson", legal_name="M Nelson", licences=licences)
+
+    assert pilot != k.Pilot("Someone Else", legal_name="M Nelson", licences=licences, id=pilot.id)
+    assert pilot != k.Pilot("Michael Nelson", licences=licences, id=pilot.id)
+    assert pilot != k.Pilot("Michael Nelson", legal_name="M Nelson", id=pilot.id)
+    assert pilot != k.Pilot("Michael Nelson", legal_name="M Nelson", licences=licences)

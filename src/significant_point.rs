@@ -10,8 +10,8 @@ use crate::error::to_py_err;
 use crate::waypoint::Waypoint;
 
 /// An ICAO route/flight-path point: a coded designator or a lat/long.
-#[pyclass(skip_from_py_object, module = "icao_shared_kernel")]
-#[derive(Clone)]
+#[pyclass(eq, skip_from_py_object, module = "icao_shared_kernel")]
+#[derive(Clone, PartialEq)]
 pub enum SignificantPoint {
     Designator(Waypoint),
     Coordinate(Coordinate),

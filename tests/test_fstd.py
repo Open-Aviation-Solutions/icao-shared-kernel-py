@@ -119,3 +119,17 @@ def test_session_duration_and_route() -> None:
     duration = session.duration()
     assert duration is not None
     assert duration.total_minutes == 90
+
+
+def test_session_equality_is_by_value() -> None:
+    device_id = uuid4()
+    session = k.FstdSession.create(device_id, "C172")
+    same = k.FstdSession(
+        device_id,
+        simulated_aircraft_type=k.AircraftType("C172"),
+        id=session.id,
+    )
+
+    assert session == same
+    assert session != k.FstdSession(device_id, id=session.id)
+    assert session != k.FstdSession.create(uuid4(), "C172")

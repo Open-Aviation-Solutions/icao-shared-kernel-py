@@ -100,3 +100,57 @@ def test_naive_datetime_rejected() -> None:
             datetime(2026, 4, 19, 3, 0),  # no tzinfo
             None,
         )
+
+
+def test_flight_equality_is_by_value() -> None:
+    aircraft_id = uuid4()
+    flight = k.Flight(
+        aircraft_id,
+        k.SignificantPoint.designator("YSBK"),
+        k.SignificantPoint.designator("YSCN"),
+    )
+    same = k.Flight(
+        aircraft_id,
+        k.SignificantPoint.designator("YSBK"),
+        k.SignificantPoint.designator("YSCN"),
+        id=flight.id,
+    )
+
+    assert flight == same
+
+
+def test_flight_equality_covers_every_field() -> None:
+    aircraft_id = uuid4()
+    moment = datetime(2026, 4, 19, 3, 0, tzinfo=timezone.utc)
+    flight = k.Flight(
+        aircraft_id,
+        k.SignificantPoint.designator("YSBK"),
+        k.SignificantPoint.designator("YSCN"),
+        first_movement=moment,
+    )
+
+    def rebuilt(**changes: object) -> k.Flight:
+        args = {
+            "aircraft_id": aircraft_id,
+            "departure": k.SignificantPoint.designator("YSBK"),
+            "arrival": k.SignificantPoint.designator("YSCN"),
+            "first_movement": moment,
+            "id": flight.id,
+        }
+        args.update(changes)
+        return k.Flight(**args)  # type: ignore[arg-type]
+
+    assert flight == rebuilt()
+    assert flight != rebuilt(aircraft_id=uuid4())
+    assert flight != rebuilt(arrival=k.SignificantPoint.designator("YMML"))
+    assert flight != rebuilt(first_movement=None)
+    assert flight != rebuilt(id=uuid4())
+
+
+def test_significant_point_equality_is_by_value() -> None:
+    assert k.SignificantPoint.designator("YSBK") == k.SignificantPoint.designator(
+        "YSBK"
+    )
+    assert k.SignificantPoint.designator("YSBK") != k.SignificantPoint.designator(
+        "YSCN"
+    )
