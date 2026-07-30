@@ -58,6 +58,13 @@ API; that migration is scoped separately, once this crate is usable.
   `Waypoint`/`Coordinate` opt in explicitly (`from_py_object`) because they
   are `SignificantPoint`'s complex-enum variant fields, which need it to
   extract constructor arguments.
+- **`#[pyclass(eq)]` on everything the domain crate compares.** Every
+  aggregate and value object derives `PartialEq` in `icao-shared-kernel-rs`,
+  so Python gets value equality too. Without `eq`, `==` silently falls back
+  to identity — it does not fail, it just quietly answers the wrong
+  question, and consumers end up comparing field by field to work around it
+  (see task 0004). When adding a class, opt in unless the domain type
+  genuinely has no `PartialEq`.
 - **Type stubs are hand-written** (`*.pyi`), not generated — see task 0001
   for why. Keep them in sync with `src/lib.rs`'s public surface by hand.
 
