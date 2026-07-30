@@ -27,12 +27,18 @@ API; that migration is scoped separately, once this crate is usable.
   `icao-shared-kernel-rs`, not here. If a rule needs adding or changing,
   change it there first, then update the binding (usually no change needed,
   since bindings delegate).
-- **Boundary type mapping is fixed** (see task 0001 for the reasoning):
-  - `Uuid` ↔ Python `str`.
-  - `rust_decimal::Decimal` ↔ Python `str`.
+- **Boundary type mapping is fixed** (see task 0001 for the reasoning, and
+  task 0003 for the `Uuid` revision):
+  - `Uuid` ↔ Python `uuid.UUID`, via PyO3's built-in `uuid` feature.
   - `time::UtcDateTime` ↔ aware Python `datetime.datetime` (UTC), via
-    PyO3's built-in `time` feature — no hand-rolled conversion needed or
-    wanted.
+    PyO3's built-in `time` feature.
+  - `rust_decimal::Decimal` ↔ Python `str` — the one remaining hand-rolled
+    conversion, in `convert.rs`.
+
+  **Prefer a PyO3 feature to a hand-rolled string conversion.** Ids used to
+  cross as `str` simply because nobody checked; the feature existed. Where a
+  native Python type exists and PyO3 supports it, use it — a stringified type
+  pushes conversion (and a class of quiet bugs) onto every consumer.
 - **One `#[pyclass]` per value object / aggregate**, each in its own module
   file (mirrors the Rust crate's module layout), wrapping the domain type
   as a private tuple field: `pub struct Waypoint(pub(crate) DomainWaypoint);`

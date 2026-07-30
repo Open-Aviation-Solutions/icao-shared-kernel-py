@@ -6,7 +6,6 @@ use time::UtcDateTime;
 use uuid::Uuid;
 
 use crate::aircraft_type::AircraftType;
-use crate::convert::parse_uuid;
 use crate::error::to_py_err;
 use crate::flight_duration::FlightDuration;
 use crate::significant_point::SignificantPoint;
@@ -29,19 +28,15 @@ impl FstdSession {
     #[pyo3(signature = (device_id, simulated_aircraft_type=None, departure=None, arrival=None, start=None, end=None, id=None))]
     #[allow(clippy::too_many_arguments)]
     fn new(
-        device_id: &str,
+        device_id: Uuid,
         simulated_aircraft_type: Option<&AircraftType>,
         departure: Option<PyRef<'_, SignificantPoint>>,
         arrival: Option<PyRef<'_, SignificantPoint>>,
         start: Option<UtcDateTime>,
         end: Option<UtcDateTime>,
-        id: Option<&str>,
+        id: Option<Uuid>,
     ) -> PyResult<Self> {
-        let device_id = parse_uuid(device_id)?;
-        let id = match id {
-            Some(id) => parse_uuid(id)?,
-            None => Uuid::new_v4(),
-        };
+        let id = id.unwrap_or_else(Uuid::new_v4);
         Ok(Self(DomainFstdSession::with(
             id,
             device_id,
@@ -56,21 +51,20 @@ impl FstdSession {
     /// Convenience constructor for a session with no route and no times
     /// recorded, validating the simulated type designator.
     #[staticmethod]
-    fn create(device_id: &str, simulated_type: &str) -> PyResult<Self> {
-        let device_id = parse_uuid(device_id)?;
+    fn create(device_id: Uuid, simulated_type: &str) -> PyResult<Self> {
         DomainFstdSession::create(device_id, simulated_type)
             .map(Self)
             .map_err(to_py_err)
     }
 
     #[getter]
-    fn id(&self) -> String {
-        self.0.id.to_string()
+    fn id(&self) -> Uuid {
+        self.0.id
     }
 
     #[getter]
-    fn device_id(&self) -> String {
-        self.0.device_id.to_string()
+    fn device_id(&self) -> Uuid {
+        self.0.device_id
     }
 
     #[getter]

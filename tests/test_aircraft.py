@@ -1,6 +1,8 @@
 """Aircraft type, registration, and aggregate behaviour — adapted from
 icao-shared-kernel-rs tests/aircraft.rs."""
 
+from uuid import UUID, uuid4
+
 import pytest
 
 import icao_shared_kernel as k
@@ -50,3 +52,25 @@ def test_new_from_parts() -> None:
     aircraft = k.Aircraft(aircraft_type, registration)
     assert aircraft.aircraft_type.designator == "C172"
     assert aircraft.registration.registration == "ABC"
+
+
+def test_id_is_a_native_uuid_and_round_trips() -> None:
+    # Ids cross the boundary as uuid.UUID, not as strings — consumers hold
+    # UUID in their own aggregates and must not have to convert.
+    given = uuid4()
+    aircraft = k.Aircraft(
+        k.AircraftType("C172"), k.AircraftRegistration("VH", "ABC"), given
+    )
+    assert isinstance(aircraft.id, UUID)
+    assert aircraft.id == given
+
+
+def test_id_rejects_a_uuid_shaped_string() -> None:
+    # Guards the contract: were the getter to fall back to str, this would
+    # silently start passing again.
+    with pytest.raises(TypeError):
+        k.Aircraft(
+            k.AircraftType("C172"),
+            k.AircraftRegistration("VH", "ABC"),
+            str(uuid4()),  # type: ignore[arg-type]
+        )

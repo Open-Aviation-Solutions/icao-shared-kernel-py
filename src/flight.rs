@@ -6,7 +6,6 @@ use pyo3::prelude::*;
 use time::UtcDateTime;
 use uuid::Uuid;
 
-use crate::convert::parse_uuid;
 use crate::error::to_py_err;
 use crate::flight_duration::FlightDuration;
 use crate::significant_point::SignificantPoint;
@@ -24,18 +23,14 @@ impl Flight {
     #[pyo3(signature = (aircraft_id, departure, arrival, first_movement=None, last_movement=None, id=None))]
     #[allow(clippy::too_many_arguments)]
     fn new(
-        aircraft_id: &str,
+        aircraft_id: Uuid,
         departure: PyRef<'_, SignificantPoint>,
         arrival: PyRef<'_, SignificantPoint>,
         first_movement: Option<UtcDateTime>,
         last_movement: Option<UtcDateTime>,
-        id: Option<&str>,
+        id: Option<Uuid>,
     ) -> PyResult<Self> {
-        let aircraft_id = parse_uuid(aircraft_id)?;
-        let id = match id {
-            Some(id) => parse_uuid(id)?,
-            None => Uuid::new_v4(),
-        };
+        let id = id.unwrap_or_else(Uuid::new_v4);
         Ok(Self(DomainFlight::with(
             id,
             aircraft_id,
@@ -49,21 +44,20 @@ impl Flight {
     /// Convenience constructor from coded designator strings, with no
     /// movement times recorded.
     #[staticmethod]
-    fn create(aircraft_id: &str, departure: &str, arrival: &str) -> PyResult<Self> {
-        let aircraft_id = parse_uuid(aircraft_id)?;
+    fn create(aircraft_id: Uuid, departure: &str, arrival: &str) -> PyResult<Self> {
         DomainFlight::create(aircraft_id, departure, arrival)
             .map(Self)
             .map_err(to_py_err)
     }
 
     #[getter]
-    fn id(&self) -> String {
-        self.0.id.to_string()
+    fn id(&self) -> Uuid {
+        self.0.id
     }
 
     #[getter]
-    fn aircraft_id(&self) -> String {
-        self.0.aircraft_id.to_string()
+    fn aircraft_id(&self) -> Uuid {
+        self.0.aircraft_id
     }
 
     #[getter]

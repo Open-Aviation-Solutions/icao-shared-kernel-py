@@ -42,7 +42,7 @@ def test_device_round_trips_kind_and_qualification() -> None:
 
 
 def test_explicit_id_preserved() -> None:
-    device_id = str(uuid4())
+    device_id = uuid4()
     device = k.FlightSimulationTrainingDevice(
         k.FstdKind.FlightProceduresTrainer,
         k.DeviceDesignation("FNPT II"),
@@ -81,7 +81,7 @@ def test_qualification_rejects_malformed_issuing_state() -> None:
 
 
 def test_session_defaults_are_all_empty() -> None:
-    session = k.FstdSession(str(uuid4()))
+    session = k.FstdSession(uuid4())
     assert session.simulated_aircraft_type is None
     assert session.departure is None
     assert session.route_summary() is None
@@ -90,7 +90,7 @@ def test_session_defaults_are_all_empty() -> None:
 
 
 def test_one_device_simulates_different_types_across_sessions() -> None:
-    device_id = str(uuid4())
+    device_id = uuid4()
     cessna = k.FstdSession.create(device_id, "C172")
     boeing = k.FstdSession.create(device_id, "B738")
 
@@ -103,12 +103,12 @@ def test_one_device_simulates_different_types_across_sessions() -> None:
 
 def test_session_create_rejects_invalid_designator() -> None:
     with pytest.raises(k.InvalidAircraftTypeError):
-        k.FstdSession.create(str(uuid4()), "c172")
+        k.FstdSession.create(uuid4(), "c172")
 
 
 def test_session_duration_and_route() -> None:
     session = k.FstdSession(
-        str(uuid4()),
+        uuid4(),
         k.AircraftType("B738"),
         k.SignificantPoint.Designator(k.Waypoint("YSSY")),
         k.SignificantPoint.Designator(k.Waypoint("YMML")),

@@ -6,7 +6,6 @@ use icao_shared_kernel::{
 use pyo3::prelude::*;
 use uuid::Uuid;
 
-use crate::convert::parse_uuid;
 use crate::device_designation::DeviceDesignation;
 use crate::device_qualification::DeviceQualification;
 use crate::error::to_py_err;
@@ -63,12 +62,9 @@ impl FlightSimulationTrainingDevice {
         kind: FstdKind,
         designation: &DeviceDesignation,
         qualification: Option<&DeviceQualification>,
-        id: Option<&str>,
+        id: Option<Uuid>,
     ) -> PyResult<Self> {
-        let id = match id {
-            Some(id) => parse_uuid(id)?,
-            None => Uuid::new_v4(),
-        };
+        let id = id.unwrap_or_else(Uuid::new_v4);
         Ok(Self(DomainFstd::with(
             id,
             kind.into(),
@@ -87,8 +83,8 @@ impl FlightSimulationTrainingDevice {
     }
 
     #[getter]
-    fn id(&self) -> String {
-        self.0.id.to_string()
+    fn id(&self) -> Uuid {
+        self.0.id
     }
 
     #[getter]

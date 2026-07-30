@@ -5,6 +5,7 @@ Keep in sync with src/lib.rs and the per-type src/*.rs modules by hand.
 """
 
 from datetime import date, datetime
+from uuid import UUID
 
 class ValidationError(ValueError):
     """Base class for every icao_shared_kernel validation error."""
@@ -86,14 +87,14 @@ class Aircraft:
         self,
         aircraft_type: AircraftType,
         registration: AircraftRegistration,
-        id: str | None = None,
+        id: UUID | None = None,
     ) -> None: ...
     @staticmethod
     def create(
         type_designator: str, nationality: str, registration: str
     ) -> Aircraft: ...
     @property
-    def id(self) -> str: ...
+    def id(self) -> UUID: ...
     @property
     def aircraft_type(self) -> AircraftType: ...
     @property
@@ -105,10 +106,10 @@ class Pilot:
         display_name: str,
         legal_name: str | None = None,
         licences: list[Licence] | None = None,
-        id: str | None = None,
+        id: UUID | None = None,
     ) -> None: ...
     @property
-    def id(self) -> str: ...
+    def id(self) -> UUID: ...
     @property
     def display_name(self) -> str: ...
     @property
@@ -119,22 +120,22 @@ class Pilot:
 class Flight:
     def __init__(
         self,
-        aircraft_id: str,
+        aircraft_id: UUID,
         departure: SignificantPoint,
         arrival: SignificantPoint,
         first_movement: datetime | None = None,
         last_movement: datetime | None = None,
-        id: str | None = None,
+        id: UUID | None = None,
     ) -> None: ...
     @staticmethod
-    def create(aircraft_id: str, departure: str, arrival: str) -> Flight:
+    def create(aircraft_id: UUID, departure: str, arrival: str) -> Flight:
         """Convenience constructor from coded designator strings, with no
         movement times recorded."""
 
     @property
-    def id(self) -> str: ...
+    def id(self) -> UUID: ...
     @property
-    def aircraft_id(self) -> str: ...
+    def aircraft_id(self) -> UUID: ...
     @property
     def departure(self) -> SignificantPoint: ...
     @property
@@ -192,7 +193,7 @@ class FlightSimulationTrainingDevice:
         kind: FstdKind,
         designation: DeviceDesignation,
         qualification: DeviceQualification | None = None,
-        id: str | None = None,
+        id: UUID | None = None,
     ) -> None: ...
     @staticmethod
     def create(
@@ -201,7 +202,7 @@ class FlightSimulationTrainingDevice:
         """Convenience constructor for an unqualified device."""
 
     @property
-    def id(self) -> str: ...
+    def id(self) -> UUID: ...
     @property
     def kind(self) -> FstdKind: ...
     @property
@@ -212,23 +213,23 @@ class FlightSimulationTrainingDevice:
 class FstdSession:
     def __init__(
         self,
-        device_id: str,
+        device_id: UUID,
         simulated_aircraft_type: AircraftType | None = None,
         departure: SignificantPoint | None = None,
         arrival: SignificantPoint | None = None,
         start: datetime | None = None,
         end: datetime | None = None,
-        id: str | None = None,
+        id: UUID | None = None,
     ) -> None: ...
     @staticmethod
-    def create(device_id: str, simulated_type: str) -> FstdSession:
+    def create(device_id: UUID, simulated_type: str) -> FstdSession:
         """Convenience constructor for a session with no route and no times
         recorded."""
 
     @property
-    def id(self) -> str: ...
+    def id(self) -> UUID: ...
     @property
-    def device_id(self) -> str: ...
+    def device_id(self) -> UUID: ...
     @property
     def simulated_aircraft_type(self) -> AircraftType | None: ...
     @property

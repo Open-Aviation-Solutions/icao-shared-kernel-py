@@ -4,7 +4,6 @@ use icao_shared_kernel::Pilot as DomainPilot;
 use pyo3::prelude::*;
 use uuid::Uuid;
 
-use crate::convert::parse_uuid;
 use crate::error::to_py_err;
 use crate::licence::Licence;
 
@@ -23,12 +22,9 @@ impl Pilot {
         display_name: &str,
         legal_name: Option<&str>,
         licences: Option<Vec<PyRef<'_, Licence>>>,
-        id: Option<&str>,
+        id: Option<Uuid>,
     ) -> PyResult<Self> {
-        let id = match id {
-            Some(id) => parse_uuid(id)?,
-            None => Uuid::new_v4(),
-        };
+        let id = id.unwrap_or_else(Uuid::new_v4);
         let licences = licences
             .unwrap_or_default()
             .iter()
@@ -40,8 +36,8 @@ impl Pilot {
     }
 
     #[getter]
-    fn id(&self) -> String {
-        self.0.id.to_string()
+    fn id(&self) -> Uuid {
+        self.0.id
     }
 
     #[getter]
