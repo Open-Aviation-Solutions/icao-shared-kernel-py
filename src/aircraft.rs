@@ -6,7 +6,6 @@ use uuid::Uuid;
 
 use crate::aircraft_registration::AircraftRegistration;
 use crate::aircraft_type::AircraftType;
-use crate::convert::parse_uuid;
 use crate::error::to_py_err;
 
 /// Aircraft reference entity: ICAO-universal identity and descriptors.
@@ -21,12 +20,9 @@ impl Aircraft {
     fn new(
         aircraft_type: &AircraftType,
         registration: &AircraftRegistration,
-        id: Option<&str>,
+        id: Option<Uuid>,
     ) -> PyResult<Self> {
-        let id = match id {
-            Some(id) => parse_uuid(id)?,
-            None => Uuid::new_v4(),
-        };
+        let id = id.unwrap_or_else(Uuid::new_v4);
         Ok(Self(DomainAircraft::with(
             id,
             aircraft_type.0.clone(),
@@ -43,8 +39,8 @@ impl Aircraft {
     }
 
     #[getter]
-    fn id(&self) -> String {
-        self.0.id.to_string()
+    fn id(&self) -> Uuid {
+        self.0.id
     }
 
     #[getter]
