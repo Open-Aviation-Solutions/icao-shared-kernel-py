@@ -6,6 +6,7 @@ build-backend = "maturin"
 name = "icao-shared-kernel"
 version = "0.1.0"
 description = "Python bindings for the icao-shared-kernel Rust domain crate."
+license = { text = "MPL-2.0" }
 requires-python = ">=3.9"
 classifiers = ["Programming Language :: Rust", "Programming Language :: Python :: Implementation :: CPython"]
 
