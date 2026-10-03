@@ -2,6 +2,7 @@
 name = "icao-shared-kernel-py"
 version = "0.1.0"
 edition = "2021"
+license = "MPL-2.0"
 description = "Python bindings (PyO3) for the icao-shared-kernel Rust domain crate."
 publish = false
 
